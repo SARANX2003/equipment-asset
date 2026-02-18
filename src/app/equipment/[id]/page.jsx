@@ -20,11 +20,13 @@ export default function EquipmentDetailPage() {
       method: "POST",
     });
 
+    const data = await res.json();
+
     if (res.ok) {
       alert("ยืมอุปกรณ์สำเร็จ");
       fetchEquipment();
     } else {
-      alert("เกิดข้อผิดพลาด");
+      alert(data.message || "เกิดข้อผิดพลาด");
     }
   };
 
@@ -47,7 +49,7 @@ export default function EquipmentDetailPage() {
         {equipment.status === "Available" && (
           <button
             onClick={borrowEquipment}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+            className="w-full bg-green-600 text-white py-3 rounded-lg"
           >
             ยืมอุปกรณ์
           </button>
@@ -59,6 +61,19 @@ export default function EquipmentDetailPage() {
           </div>
         )}
       </div>
+
+      {equipment.qrCode && (
+        <div className="bg-white shadow rounded-xl p-6 text-center">
+          <h2 className="text-lg font-semibold mb-4">
+            QR Code ครุภัณฑ์
+          </h2>
+          <img
+            src={equipment.qrCode}
+            alt="QR Code"
+            className="mx-auto w-48"
+          />
+        </div>
+      )}
     </div>
   );
 }
