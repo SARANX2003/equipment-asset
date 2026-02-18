@@ -42,7 +42,7 @@ export async function GET(req) {
 
 
 // ===============================
-// POST: เพิ่มครุภัณฑ์ + สร้าง QR
+// POST: เพิ่มครุภัณฑ์ + สร้าง QR (ใช้ Domain จริง)
 // ===============================
 export async function POST(req) {
   await dbConnect();
@@ -50,22 +50,29 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    // สร้างอุปกรณ์ก่อน
+    // 🔥 ต้องมี BASE_URL จาก Vercel
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+    if (!baseUrl) {
+      return NextResponse.json(
+        { message: "NEXT_PUBLIC_BASE_URL is not defined" },
+        { status: 500 }
+      );
+    }
+
+    // 1️⃣ สร้างอุปกรณ์ก่อน
     const newEquipment = await Equipment.create(body);
 
-    // สร้าง URL สำหรับ QR
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
+    // 2️⃣ สร้าง URL สำหรับ QR (Domain จริง)
     const qrUrl = `${baseUrl}/equipment/${newEquipment._id}`;
 
-    // สร้าง QR Code
+    // 3️⃣ สร้าง QR Code
     const qrImage = await QRCode.toDataURL(qrUrl, {
       width: 400,
       margin: 2,
     });
 
-    // บันทึก QR ลง DB
+    // 4️⃣ บันทึก QR ลง DB
     newEquipment.qrCode = qrImage;
     await newEquipment.save();
 
@@ -73,6 +80,7 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("CREATE EQUIPMENT ERROR:", error);
+
     return NextResponse.json(
       { message: "Create equipment failed" },
       { status: 500 }
