@@ -11,13 +11,15 @@ const EquipmentSchema = new mongoose.Schema(
       required: true,
     },
     category: String,
+
     status: {
       type: String,
-      default: "available",
+      enum: ["Available", "Borrowed"],
+      default: "Available",
     },
+
     location: String,
 
-    // ✅ เก็บ QR Code แบบ Base64
     qrCode: {
       type: String,
     },
