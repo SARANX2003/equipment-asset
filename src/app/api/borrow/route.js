@@ -1,54 +1,60 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
 import Equipment from "@/models/Equipment";
-import User from "@/models/User"; // ✅ ต้อง import ตัวนี้
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
-
-// =========================
-// GET - สำหรับ Admin ดูรายการ
-// =========================
-export async function GET() {
-  await dbConnect();
-
+export async function POST(request) {
   try {
-    const borrows = await Borrow.find()
-      .populate("equipment")
-      .populate("user") // ตอนนี้จะไม่ error แล้ว
-      .sort({ createdAt: -1 });
+    await dbConnect();
 
-    return NextResponse.json(borrows);
-  } catch (error) {
-    console.error("GET BORROW ERROR:", error);
-    return NextResponse.json(
-      { message: "โหลดข้อมูลล้มเหลว" },
-      { status: 500 }
-    );
-  }
-}
+    const { equipmentId, userId, location } = await request.json();
 
+    // 🔎 ตรวจสอบ ObjectId
+    if (
+      !mongoose.Types.ObjectId.isValid(equipmentId) ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return NextResponse.json(
+        { message: "ID ไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
 
-// =========================
-// POST - สร้างคำขอยืม
-// =========================
-export async function POST(req) {
-  await dbConnect();
+    // 🔎 ตรวจสอบอุปกรณ์
+    const equipment = await Equipment.findById(equipmentId);
 
-  try {
-    const body = await req.json();
+    if (!equipment) {
+      return NextResponse.json(
+        { message: "ไม่พบอุปกรณ์" },
+        { status: 404 }
+      );
+    }
 
-    const borrow = await Borrow.create({
-      equipment: body.equipmentId,
-      user: body.userId,
-      location: body.location,
+    if (equipment.status === "Borrowed") {
+      return NextResponse.json(
+        { message: "อุปกรณ์ถูกยืมแล้ว" },
+        { status: 400 }
+      );
+    }
+
+    // ✅ สร้างคำขอยืม
+    const newBorrow = await Borrow.create({
+      equipment: equipmentId,
+      user: userId,
+      location,
       status: "pending",
     });
 
-    return NextResponse.json(borrow);
+    return NextResponse.json({
+      message: "ส่งคำขอยืมสำเร็จ",
+      borrow: newBorrow,
+    });
+
   } catch (error) {
-    console.error("POST BORROW ERROR:", error);
+    console.error("BORROW ERROR:", error);
     return NextResponse.json(
-      { message: "บันทึกไม่สำเร็จ" },
+      { message: "เกิดข้อผิดพลาดในระบบ" },
       { status: 500 }
     );
   }

@@ -13,27 +13,52 @@ export default function EquipmentDetailPage() {
   const fetchEquipment = async () => {
     if (!id) return;
 
-    const res = await fetch(`/api/equipment/${id}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/equipment/${id}`);
+      const data = await res.json();
 
-    setEquipment(data);
-    setLoading(false);
+      setEquipment(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("FETCH ERROR:", error);
+      setLoading(false);
+    }
   };
 
   const borrowEquipment = async () => {
     if (!id) return;
 
-    const res = await fetch(`/api/borrow/${id}`, {
-      method: "POST",
-    });
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    const data = await res.json();
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อนยืม");
+      return;
+    }
 
-    if (res.ok) {
-      alert("ยืมอุปกรณ์สำเร็จ");
-      fetchEquipment();
-    } else {
-      alert(data.message || "เกิดข้อผิดพลาด");
+    try {
+      const res = await fetch("/api/borrow", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          equipmentId: id,
+          userId: user._id,
+          location: equipment.location,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("ส่งคำขอยืมสำเร็จ รอการอนุมัติ");
+      } else {
+        alert(data.message || "เกิดข้อผิดพลาด");
+      }
+
+    } catch (error) {
+      console.error("BORROW ERROR:", error);
+      alert("เกิดข้อผิดพลาดในระบบ");
     }
   };
 
@@ -41,8 +66,8 @@ export default function EquipmentDetailPage() {
     fetchEquipment();
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!equipment) return <p>ไม่พบข้อมูล</p>;
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (!equipment) return <p className="text-center mt-10">ไม่พบข้อมูล</p>;
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
@@ -56,7 +81,7 @@ export default function EquipmentDetailPage() {
         {equipment.status === "Available" && (
           <button
             onClick={borrowEquipment}
-            className="w-full bg-green-600 text-white py-3 rounded-lg"
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
           >
             ยืมอุปกรณ์
           </button>
