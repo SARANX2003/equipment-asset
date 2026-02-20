@@ -6,18 +6,23 @@ export default function AdminBorrowPage() {
   const [borrows, setBorrows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchBorrows = async () => {
-    try {
-      const res = await fetch("/api/borrow/borrow-list");
-      const data = await res.json();
-      setBorrows(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchBorrows = async () => {
+  try {
+    const res = await fetch("/api/borrow/borrow-list");
 
+    if (!res.ok) {
+      throw new Error("โหลดข้อมูลล้มเหลว");
+    }
+
+    const data = await res.json();
+    setBorrows(data);
+
+  } catch (error) {
+    console.error("FETCH ERROR:", error);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchBorrows();
   }, []);
