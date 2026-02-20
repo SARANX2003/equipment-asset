@@ -1,37 +1,30 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
 import Equipment from "@/models/Equipment";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
-export async function PUT(req, context) {
+export async function POST(request, { params }) {
   await dbConnect();
 
-  const { id } = await context.params;
+  const { id } = params;
 
-  try {
-    const borrow = await Borrow.findById(id);
-
-    if (!borrow) {
-      return NextResponse.json(
-        { message: "ไม่พบข้อมูล" },
-        { status: 404 }
-      );
-    }
-
-    borrow.status = "returned";
-    await borrow.save();
-
-    await Equipment.findByIdAndUpdate(
-      borrow.equipment,
-      { status: "Available" }
-    );
-
-    return NextResponse.json({ message: "คืนอุปกรณ์สำเร็จ" });
-
-  } catch (error) {
-    return NextResponse.json(
-      { message: "คืนไม่สำเร็จ" },
-      { status: 500 }
-    );
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: "ID ไม่ถูกต้อง" }, { status: 400 });
   }
+
+  const borrow = await Borrow.findById(id).populate("equipment");
+
+  if (!borrow) {
+    return NextResponse.json({ message: "ไม่พบรายการ" }, { status: 404 });
+  }
+
+  borrow.status = "returned";
+  await borrow.save();
+
+  const equipment = await Equipment.findById(borrow.equipment._id);
+  equipment.status = "Available";
+  await equipment.save();
+
+  return NextResponse.json({ message: "คืนสำเร็จ" });
 }
