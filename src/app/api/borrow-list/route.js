@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await dbConnect();
 
-    const borrows = await Borrow.find({})
+    const borrows = await Borrow.find()
       .populate("equipment")
       .populate("user")
       .sort({ createdAt: -1 });
@@ -15,7 +15,6 @@ export async function GET() {
 
   } catch (error) {
     console.error("BORROW LIST ERROR:", error);
-
     return NextResponse.json(
       { message: "Server Error" },
       { status: 500 }
