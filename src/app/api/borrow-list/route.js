@@ -12,11 +12,10 @@ export async function GET() {
       .sort({ createdAt: -1 });
 
     return NextResponse.json(borrows);
-
   } catch (error) {
-    console.error("BORROW LIST ERROR:", error);
+    console.error("Borrow List Error:", error);
     return NextResponse.json(
-      { message: error.message },
+      { message: "Server Error" },
       { status: 500 }
     );
   }
