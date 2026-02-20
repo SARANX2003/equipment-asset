@@ -1,21 +1,13 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
 import Equipment from "@/models/Equipment";
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(request, { params }) {
   try {
     await dbConnect();
 
-    const { id } = params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { message: "ID ไม่ถูกต้อง" },
-        { status: 400 }
-      );
-    }
+    const id = params.id;
 
     const borrow = await Borrow.findById(id);
 
