@@ -8,7 +8,7 @@ export default function AdminBorrowPage() {
 
 const fetchBorrows = async () => {
   try {
-    const res = await fetch("/api/borrow/borrow-list");
+    const res = await fetch("/api/borrow-list");
 
     if (!res.ok) {
       throw new Error("โหลดข้อมูลล้มเหลว");
