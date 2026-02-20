@@ -10,6 +10,9 @@ export default function AdminBorrowPage() {
     try {
       const res = await fetch("/api/borrow-list");
       const data = await res.json();
+
+      console.log("Borrow List:", data);
+
       setBorrows(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("FETCH ERROR:", err);
@@ -24,23 +27,56 @@ export default function AdminBorrowPage() {
   }, []);
 
   const approve = async (id) => {
-    await fetch(`/api/borrow/approve/${id}`, {
+    console.log("Approve ID:", id);
+
+    const res = await fetch(`/api/borrow/approve/${id}`, {
       method: "POST",
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "เกิดข้อผิดพลาด");
+      return;
+    }
+
+    alert("อนุมัติสำเร็จ");
     fetchBorrows();
   };
 
   const reject = async (id) => {
-    await fetch(`/api/borrow/reject/${id}`, {
+    console.log("Reject ID:", id);
+
+    const res = await fetch(`/api/borrow/reject/${id}`, {
       method: "POST",
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "เกิดข้อผิดพลาด");
+      return;
+    }
+
+    alert("ปฏิเสธสำเร็จ");
     fetchBorrows();
   };
 
   const returnItem = async (id) => {
-    await fetch(`/api/borrow/return/${id}`, {
+    console.log("Return ID:", id);
+
+    const res = await fetch(`/api/borrow/return/${id}`, {
       method: "POST",
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "เกิดข้อผิดพลาด");
+      return;
+    }
+
+    alert("คืนอุปกรณ์สำเร็จ");
     fetchBorrows();
   };
 
