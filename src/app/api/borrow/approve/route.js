@@ -1,18 +1,17 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
 import Equipment from "@/models/Equipment";
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
-export async function POST(request, { params }) {
+export async function POST(request) {
   try {
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await request.json();
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id) {
       return NextResponse.json(
-        { message: "ID ไม่ถูกต้อง" },
+        { message: "ไม่มี id ส่งมา" },
         { status: 400 }
       );
     }
@@ -26,18 +25,18 @@ export async function POST(request, { params }) {
       );
     }
 
-    borrow.status = "returned";
+    borrow.status = "approved";
     await borrow.save();
 
     await Equipment.findByIdAndUpdate(
       borrow.equipment,
-      { status: "Available" }
+      { status: "Borrowed" }
     );
 
-    return NextResponse.json({ message: "คืนอุปกรณ์สำเร็จ" });
+    return NextResponse.json({ message: "อนุมัติสำเร็จ" });
 
   } catch (error) {
-    console.error("RETURN ERROR:", error);
+    console.error("APPROVE ERROR:", error);
     return NextResponse.json(
       { message: error.message },
       { status: 500 }
