@@ -4,18 +4,25 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 export default function EquipmentDetailPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id;
+
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchEquipment = async () => {
+    if (!id) return;
+
     const res = await fetch(`/api/equipment/${id}`);
     const data = await res.json();
+
     setEquipment(data);
     setLoading(false);
   };
 
   const borrowEquipment = async () => {
+    if (!id) return;
+
     const res = await fetch(`/api/borrow/${id}`, {
       method: "POST",
     });
@@ -31,7 +38,7 @@ export default function EquipmentDetailPage() {
   };
 
   useEffect(() => {
-    if (id) fetchEquipment();
+    fetchEquipment();
   }, [id]);
 
   if (loading) return <p>Loading...</p>;

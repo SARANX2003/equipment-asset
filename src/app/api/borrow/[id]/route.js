@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import Equipment from "@/models/Equipment";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(request, { params }) {
@@ -8,8 +9,17 @@ export async function POST(request, { params }) {
 
     const { id } = params;
 
-    // หาอุปกรณ์
-    const equipment = await Equipment.findById(id);
+    // 🔥 เช็ค ObjectId ก่อน
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "ID ไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
+
+    const equipment = await Equipment.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
 
     if (!equipment) {
       return NextResponse.json(
@@ -18,7 +28,6 @@ export async function POST(request, { params }) {
       );
     }
 
-    // ถ้าถูกยืมแล้ว
     if (equipment.status === "Borrowed") {
       return NextResponse.json(
         { message: "อุปกรณ์ถูกยืมแล้ว" },
@@ -26,7 +35,6 @@ export async function POST(request, { params }) {
       );
     }
 
-    // อัปเดตสถานะ
     equipment.status = "Borrowed";
     await equipment.save();
 
@@ -37,7 +45,6 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error("BORROW ERROR:", error);
-
     return NextResponse.json(
       { message: "เกิดข้อผิดพลาดในระบบ" },
       { status: 500 }
