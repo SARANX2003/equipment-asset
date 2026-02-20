@@ -26,18 +26,18 @@ export async function POST(request, { params }) {
       );
     }
 
-    borrow.status = "approved";
+    borrow.status = "returned";
     await borrow.save();
 
     await Equipment.findByIdAndUpdate(
       borrow.equipment,
-      { status: "Borrowed" }
+      { status: "Available" }
     );
 
-    return NextResponse.json({ message: "อนุมัติสำเร็จ" });
+    return NextResponse.json({ message: "คืนอุปกรณ์สำเร็จ" });
 
   } catch (error) {
-    console.error("APPROVE ERROR:", error);
+    console.error("RETURN ERROR:", error);
     return NextResponse.json(
       { message: error.message },
       { status: 500 }

@@ -10,13 +10,19 @@ export async function POST(request, { params }) {
     const { id } = params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "ID ไม่ถูกต้อง" }, { status: 400 });
+      return NextResponse.json(
+        { message: "ID ไม่ถูกต้อง" },
+        { status: 400 }
+      );
     }
 
     const borrow = await Borrow.findById(id);
 
     if (!borrow) {
-      return NextResponse.json({ message: "ไม่พบคำขอ" }, { status: 404 });
+      return NextResponse.json(
+        { message: "ไม่พบข้อมูลคำขอยืม" },
+        { status: 404 }
+      );
     }
 
     borrow.status = "rejected";
@@ -25,6 +31,10 @@ export async function POST(request, { params }) {
     return NextResponse.json({ message: "ปฏิเสธสำเร็จ" });
 
   } catch (error) {
-    return NextResponse.json({ message: "เกิดข้อผิดพลาด" }, { status: 500 });
+    console.error("REJECT ERROR:", error);
+    return NextResponse.json(
+      { message: error.message },
+      { status: 500 }
+    );
   }
 }
