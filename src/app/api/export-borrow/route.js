@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
 import * as XLSX from "xlsx";
