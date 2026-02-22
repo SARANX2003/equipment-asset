@@ -1,5 +1,7 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
+import "@/models/User";        // 🔥 บังคับโหลด model
+import "@/models/Equipment";   // 🔥 บังคับโหลด model
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -13,8 +15,9 @@ export async function GET() {
 
     return NextResponse.json(borrows);
   } catch (error) {
+    console.error("BORROW LIST ERROR:", error);
     return NextResponse.json(
-      { message: "Server Error" },
+      { message: error.message },
       { status: 500 }
     );
   }
