@@ -60,7 +60,13 @@ export default function DashboardLayout({ children }) {
           <p className="text-xs uppercase text-green-300 px-2 mt-6">ผู้ดูแลระบบ</p>
           {menuItem("/admin/borrow", "จัดการคำขอยืม", "📥")}
           {menuItem("/admin/dashboard", "Dashboard", "📊")}
-          {menuItem("/reports", "รายงาน", "📈")}
+
+          <a
+            href="/api/export-borrow"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 transition shadow-md"
+          >
+            📊 Export รายงาน
+          </a>
 
         </nav>
 
