@@ -56,7 +56,6 @@ export default function DashboardLayout({ children }) {
 
           <p className="text-xs uppercase text-green-300 px-2">ทั่วไป</p>
           {menuItem("/dashboard", "รายการครุภัณฑ์", "📋")}
-          {menuItem("/scan", "สแกน", "🔍")}
 
           <p className="text-xs uppercase text-green-300 px-2 mt-6">ผู้ดูแลระบบ</p>
           {menuItem("/admin/borrow", "จัดการคำขอยืม", "📥")}
