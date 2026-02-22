@@ -13,13 +13,13 @@ export default function EquipmentDetailPage() {
   const [location, setLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // 🔐 บังคับ Login ก่อนเข้า
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
-      router.push("/login");
-    }
-  }, []);
+ useEffect(() => {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    router.push(`/login?redirect=/equipment/${id}`);
+  }
+}, [id]);
 
   // โหลดข้อมูลอุปกรณ์
   useEffect(() => {
