@@ -4,43 +4,49 @@ import Link from "next/link";
 
 export default function EquipmentTable({ items, onEdit, onDelete }) {
   return (
-    <div className="bg-white rounded shadow overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-green-100">
-          <tr>
-            <th className="p-3 text-left">ชื่อ</th>
-            <th className="p-3">รหัส</th>
-            <th className="p-3">หมวดหมู่</th>
-            <th className="p-3">สถานะ</th>
-            <th className="p-3">ที่ตั้ง</th>
-            <th className="p-3">จัดการ</th>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm text-left border-collapse">
+        <thead>
+          <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
+            <th className="px-4 py-3">ชื่อ</th>
+            <th className="px-4 py-3">รหัส</th>
+            <th className="px-4 py-3">หมวดหมู่</th>
+            <th className="px-4 py-3">สถานะ</th>
+            <th className="px-4 py-3">ที่ตั้ง</th>
+            <th className="px-4 py-3 text-center">จัดการ</th>
           </tr>
         </thead>
+
         <tbody>
           {items.map((item) => (
-            <tr key={item._id} className="border-t">
-              <td className="p-3 text-blue-600 underline">
-                <Link href={`/equipment/${item._id}`}>
-                  {item.name}
-                </Link>
+            <tr
+              key={item._id}
+              className="border-b hover:bg-green-50 transition duration-150"
+            >
+              <td className="px-4 py-3 font-medium text-gray-800">
+                {item.name}
               </td>
 
-              <td className="p-3 text-center">{item.code}</td>
-              <td className="p-3 text-center">{item.category}</td>
-              <td className="p-3 text-center">{item.status}</td>
-              <td className="p-3 text-center">{item.location}</td>
+              <td className="px-4 py-3">{item.code}</td>
+              <td className="px-4 py-3">{item.category}</td>
 
-              <td className="p-3 text-center space-x-2">
+              <td className="px-4 py-3">
+                <StatusBadge status={item.status} />
+              </td>
+
+              <td className="px-4 py-3">{item.location}</td>
+
+              <td className="px-4 py-3 text-center space-x-3">
                 <button
                   onClick={() => onEdit(item)}
-                  className="text-blue-600"
+                  className="text-blue-600 hover:underline"
                 >
                   แก้ไข
                 </button>
 
                 <button
                   onClick={() => onDelete(item._id)}
-                  className="text-red-600"
+                  className="text-red-600 hover:underline"
                 >
                   ลบ
                 </button>
@@ -50,5 +56,20 @@ export default function EquipmentTable({ items, onEdit, onDelete }) {
         </tbody>
       </table>
     </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const styles = {
+    Available: "bg-green-100 text-green-700",
+    Borrowed: "bg-red-100 text-red-700",
+  };
+
+  return (
+    <span
+      className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status]}`}
+    >
+      {status}
+    </span>
   );
 }
