@@ -55,18 +55,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 
-                    bg-gradient-to-br from-green-700 via-green-600 to-green-500">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-green-700 via-green-600 to-green-500">
 
       {/* Card */}
-      <div className="w-full max-w-md bg-white/95 backdrop-blur 
-                      shadow-2xl rounded-3xl p-8 
-                      animate-fade-in">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur shadow-2xl rounded-3xl p-8 animate-fade-in">
 
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-block bg-green-100 text-green-700 
-                          px-4 py-1 rounded-full text-xs font-semibold">
+          <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-semibold">
             ระบบจัดการครุภัณฑ์
           </div>
 
@@ -95,9 +91,7 @@ export default function LoginPage() {
               onChange={(e) =>
                 setForm({ ...form, username: e.target.value })
               }
-              className="w-full pl-10 pr-4 py-3 border rounded-xl 
-                         focus:ring-2 focus:ring-green-500 
-                         focus:outline-none transition"
+              className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition"
             />
           </div>
 
@@ -114,9 +108,7 @@ export default function LoginPage() {
               onChange={(e) =>
                 setForm({ ...form, password: e.target.value })
               }
-              className="w-full pl-10 pr-12 py-3 border rounded-xl 
-                         focus:ring-2 focus:ring-green-500 
-                         focus:outline-none transition"
+              className="w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition"
             />
 
             {/* Toggle */}
@@ -133,10 +125,7 @@ export default function LoginPage() {
           <button
             onClick={login}
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 
-                       text-white font-semibold py-3 rounded-xl 
-                       transition transform hover:scale-[1.02] 
-                       disabled:opacity-50"
+            className="w-full bg-green-600 hover:bg-green-700  text-white font-semibold py-3 rounded-xl transition transform hover:scale-[1.02] disabled:opacity-50"
           >
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
