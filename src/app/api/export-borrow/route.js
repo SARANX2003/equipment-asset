@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
-import XLSX from "xlsx-style";
+import * as XLSX from "xlsx";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -12,57 +12,72 @@ export async function GET() {
     .populate("equipment")
     .populate("user", "name email");
 
-  const data = borrows.map((b, index) => {
+  const rows = [];
+
+  // =====================
+  // 📌 หัวรายงาน
+  // =====================
+  rows.push(["รายงานการยืมอุปกรณ์"]);
+  rows.push(["คณะวิทยาศาสตร์"]);
+  rows.push([`วันที่ออกรายงาน: ${new Date().toLocaleDateString("th-TH")}`]);
+  rows.push([]);
+
+  // =====================
+  // 📊 Header Table
+  // =====================
+  rows.push([
+    "ลำดับ",
+    "ชื่ออุปกรณ์",
+    "ผู้ยืม",
+    "อีเมล",
+    "สถานะ",
+    "สถานที่ใช้งาน",
+    "วันที่",
+    "เวลา",
+  ]);
+
+  borrows.forEach((b, index) => {
     const dateObj = new Date(b.createdAt);
 
-    return {
-      ลำดับ: index + 1,
-      ชื่ออุปกรณ์: b.equipment?.name || "-",
-      ผู้ยืม: b.user?.name || "-",
-      อีเมล: b.user?.email || "-",
-      สถานะ: b.status,
-      สถานที่ใช้งาน: b.location || "-",
-      วันที่: dateObj.toLocaleDateString("th-TH"),
-      เวลา: dateObj.toLocaleTimeString("th-TH"),
-    };
+    rows.push([
+      index + 1,
+      b.equipment?.name || "-",
+      b.user?.name || "-",
+      b.user?.email || "-",
+      b.status,
+      b.location || "-",
+      dateObj.toLocaleDateString("th-TH"),
+      dateObj.toLocaleTimeString("th-TH"),
+    ]);
   });
 
-  const worksheet = XLSX.utils.json_to_sheet(data);
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
 
-  const range = XLSX.utils.decode_range(worksheet["!ref"]);
-
-  for (let col = range.s.c; col <= range.e.c; col++) {
-    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-    if (worksheet[cellAddress]) {
-      worksheet[cellAddress].s = {
-        fill: {
-          fgColor: { rgb: "16A34A" }, // สีเขียว
-        },
-        font: {
-          bold: true,
-          color: { rgb: "FFFFFF" },
-        },
-        alignment: {
-          horizontal: "center",
-          vertical: "center",
-        },
-      };
-    }
-  }
-
+  // =====================
+  // 📏 Column Width
+  // =====================
   worksheet["!cols"] = [
-    { wch: 6 },   // ลำดับ
-    { wch: 20 },  // ชื่ออุปกรณ์
-    { wch: 20 },  // ผู้ยืม
-    { wch: 25 },  // อีเมล
-    { wch: 15 },  // สถานะ
-    { wch: 25 },  // สถานที่
-    { wch: 15 },  // วันที่
-    { wch: 12 },  // เวลา
+    { wch: 6 },
+    { wch: 22 },
+    { wch: 20 },
+    { wch: 28 },
+    { wch: 14 },
+    { wch: 25 },
+    { wch: 14 },
+    { wch: 12 },
+  ];
+
+  // =====================
+  // 📌 Merge หัวรายงาน
+  // =====================
+  worksheet["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
   ];
 
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานการยืมอุปกรณ์");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานการยืม");
 
   const buffer = XLSX.write(workbook, {
     type: "buffer",
@@ -71,7 +86,7 @@ export async function GET() {
 
   return new NextResponse(buffer, {
     headers: {
-      "Content-Disposition": "attachment; filename=borrow-report-pro.xlsx",
+      "Content-Disposition": "attachment; filename=borrow-report.xlsx",
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     },
