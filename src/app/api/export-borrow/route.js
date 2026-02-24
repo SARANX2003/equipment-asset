@@ -2,6 +2,8 @@ export const runtime = "nodejs";
 
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
+import "@/models/Equipment";
+import "@/models/User";
 import * as XLSX from "xlsx";
 import { NextResponse } from "next/server";
 
