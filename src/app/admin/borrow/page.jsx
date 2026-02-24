@@ -6,6 +6,7 @@ import { toast, confirmDialog } from "@/lib/alert";
 export default function AdminBorrowPage() {
   const [borrows, setBorrows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const fetchBorrows = async () => {
     try {
@@ -13,7 +14,6 @@ export default function AdminBorrowPage() {
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
-
       setBorrows(data);
     } catch (err) {
       toast("error", err.message || "โหลดข้อมูลล้มเหลว");
@@ -22,6 +22,89 @@ export default function AdminBorrowPage() {
     }
   };
 
+  // ===========================
+  // ลบรายการเดียว
+  // ===========================
+  const deleteBorrow = async (id) => {
+    const result = await confirmDialog("ต้องการลบรายการนี้หรือไม่?");
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/borrow/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast("success", "ลบสำเร็จ");
+      fetchBorrows();
+    } catch (err) {
+      toast("error", err.message);
+    }
+  };
+
+  // ===========================
+  // ลบหลายรายการ
+  // ===========================
+  const deleteMany = async () => {
+    if (selectedIds.length === 0) {
+      toast("error", "ยังไม่ได้เลือกรายการ");
+      return;
+    }
+
+    const result = await confirmDialog(
+      `ต้องการลบ ${selectedIds.length} รายการหรือไม่?`
+    );
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/borrow/delete-many", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast("success", data.message);
+      setSelectedIds([]);
+      fetchBorrows();
+    } catch (err) {
+      toast("error", err.message);
+    }
+  };
+
+  // ===========================
+  // ล้างข้อมูลเก่า
+  // ===========================
+  const cleanOld = async () => {
+    const result = await confirmDialog(
+      "ต้องการล้าง returned และ rejected ทั้งหมด?"
+    );
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/borrow/clean-old", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast("success", data.message);
+      fetchBorrows();
+    } catch (err) {
+      toast("error", err.message);
+    }
+  };
+
+  // ===========================
+  // อนุมัติ
+  // ===========================
   const approve = async (id) => {
     const result = await confirmDialog("ต้องการอนุมัติคำขอนี้?");
     if (!result.isConfirmed) return;
@@ -43,6 +126,9 @@ export default function AdminBorrowPage() {
     }
   };
 
+  // ===========================
+  // ปฏิเสธ
+  // ===========================
   const reject = async (id) => {
     const result = await confirmDialog("ต้องการปฏิเสธคำขอนี้?");
     if (!result.isConfirmed) return;
@@ -64,6 +150,9 @@ export default function AdminBorrowPage() {
     }
   };
 
+  // ===========================
+  // คืนอุปกรณ์
+  // ===========================
   const returnItem = async (id) => {
     const result = await confirmDialog("ยืนยันการคืนอุปกรณ์?");
     if (!result.isConfirmed) return;
@@ -98,20 +187,56 @@ export default function AdminBorrowPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">📋 จัดการคำขอยืม</h1>
+      <h1 className="text-3xl font-bold mb-4">📋 จัดการคำขอยืม</h1>
+
+      {/* ปุ่มด้านบน */}
+      <div className="flex gap-3 mb-6 flex-wrap">
+        <button
+          onClick={deleteMany}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+        >
+          🗑 ลบที่เลือก
+        </button>
+
+        <button
+          onClick={cleanOld}
+          className="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg"
+        >
+          🧹 ล้างข้อมูลเก่า
+        </button>
+      </div>
 
       {borrows.map((item) => (
         <div
           key={item._id}
-          className="bg-white shadow-lg rounded-xl p-5 mb-4 border"
+          className="bg-white shadow-lg rounded-xl p-5 mb-4 border hover:shadow-xl transition"
         >
-          <p><b>อุปกรณ์:</b> {item.equipment?.name}</p>
-          <p><b>ผู้ยืม:</b> {item.user?.name}</p>
-          <p><b>ใช้ที่:</b> {item.location}</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <p><b>อุปกรณ์:</b> {item.equipment?.name}</p>
+              <p><b>ผู้ยืม:</b> {item.user?.name}</p>
+              <p><b>ใช้ที่:</b> {item.location}</p>
+              <StatusBadge status={item.status} />
+            </div>
 
-          <StatusBadge status={item.status} />
+            {/* Checkbox */}
+            <input
+              type="checkbox"
+              checked={selectedIds.includes(item._id)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds([...selectedIds, item._id]);
+                } else {
+                  setSelectedIds(
+                    selectedIds.filter((id) => id !== item._id)
+                  );
+                }
+              }}
+              className="w-5 h-5"
+            />
+          </div>
 
-          <div className="mt-3 flex gap-3 flex-wrap">
+          <div className="mt-4 flex gap-3 flex-wrap">
             {item.status === "pending" && (
               <>
                 <button
@@ -138,6 +263,13 @@ export default function AdminBorrowPage() {
                 คืนอุปกรณ์
               </button>
             )}
+
+            <button
+              onClick={() => deleteBorrow(item._id)}
+              className="bg-gray-700 hover:bg-black text-white px-4 py-2 rounded-lg"
+            >
+              🗑 ลบ
+            </button>
           </div>
         </div>
       ))}
