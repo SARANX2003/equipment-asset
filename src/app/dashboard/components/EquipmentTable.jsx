@@ -23,7 +23,7 @@ export default function EquipmentTable({ items, onEdit, onDelete }) {
               key={item._id}
               className="border-b hover:bg-green-50 transition duration-150"
             >
-              {/* ✅ ชื่อคลิกได้เหมือนเดิม */}
+              {/* ชื่อคลิกได้เหมือนเดิม */}
               <td className="px-4 py-3 font-medium">
                 <Link
                   href={`/equipment/${item._id}`}
@@ -65,18 +65,35 @@ export default function EquipmentTable({ items, onEdit, onDelete }) {
   );
 }
 
+/* =========================
+   Status Badge (ภาษาไทย)
+   ========================= */
 function StatusBadge({ status }) {
-  const styles = {
-    Available: "bg-green-100 text-green-700",
-    Borrowed: "bg-red-100 text-red-700",
-    Repair: "bg-yellow-100 text-yellow-700",
+  const statusMap = {
+    Available: {
+      text: "พร้อมใช้งาน",
+      style: "bg-green-100 text-green-700",
+    },
+    Borrowed: {
+      text: "กำลังถูกยืม",
+      style: "bg-red-100 text-red-700",
+    },
+    Repair: {
+      text: "อยู่ระหว่างซ่อม",
+      style: "bg-yellow-100 text-yellow-700",
+    },
+  };
+
+  const data = statusMap[status] || {
+    text: status,
+    style: "bg-gray-100 text-gray-600",
   };
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status] || "bg-gray-100 text-gray-600"}`}
+      className={`px-3 py-1 rounded-full text-xs font-semibold ${data.style}`}
     >
-      {status}
+      {data.text}
     </span>
   );
 }
