@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import EquipmentTable from "./components/EquipmentTable";
 import SearchFilter from "./components/SearchFilter";
 import Pagination from "./components/Pagination";
@@ -18,6 +18,13 @@ export default function DashboardPage() {
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // ✅ ใช้ summary จาก backend
+  const [summary, setSummary] = useState({
+    total: 0,
+    available: 0,
+    borrowed: 0,
+  });
 
   const [openModal, setOpenModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -41,8 +48,17 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("โหลดข้อมูลล้มเหลว");
 
       const data = await res.json();
+
       setItems(data.data);
       setTotalPages(data.totalPages);
+
+      // ✅ เอาค่าจริงจาก database
+      setSummary({
+        total: data.totalItems,
+        available: data.available,
+        borrowed: data.borrowed,
+      });
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -53,14 +69,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchData();
   }, [page, search, status]);
-
-  // 📊 Summary calculation
-  const summary = useMemo(() => {
-    const total = items.length;
-    const available = items.filter(i => i.status === "Available").length;
-    const borrowed = items.filter(i => i.status === "Borrowed").length;
-    return { total, available, borrowed };
-  }, [items]);
 
   const handleAdd = () => {
     setIsEdit(false);
@@ -99,13 +107,12 @@ export default function DashboardPage() {
     });
 
     setOpenModal(false);
-    fetchData();
+    fetchData(); // ✅ รีโหลดใหม่ จะนับใหม่อัตโนมัติ
   };
 
   return (
     <div className="space-y-8">
 
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
@@ -124,14 +131,13 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* 📊 Summary Cards */}
+      {/* ✅ Summary ใช้ค่าจริง */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <SummaryCard title="อุปกรณ์ทั้งหมด" value={summary.total} color="blue" />
         <SummaryCard title="พร้อมใช้งาน" value={summary.available} color="green" />
         <SummaryCard title="กำลังถูกยืม" value={summary.borrowed} color="red" />
       </div>
 
-      {/* Filter */}
       <div className="bg-white rounded-2xl shadow-sm border p-6">
         <SearchFilter
           search={search}
@@ -142,7 +148,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm border p-6">
         {loading && <Loading />}
         {error && <ErrorState message={error} />}
