@@ -8,20 +8,59 @@ export async function GET() {
 
   await dbConnect();
 
-  const borrows = await Borrow.find()
-    .populate("equipment")
-    .populate("user")
-    .sort({ createdAt: -1 });
+  try {
 
-  const result = borrows.map(item => ({
-    _id: item._id,
-    borrowerName: item.user?.name || "-",
-    equipmentName: item.equipment?.name || "-",
-    equipmentCode: item.equipment?.code || "-",
-    location: item.location || item.equipment?.location || "-",
-    status: item.status,
-    borrowDate: item.createdAt
-  }));
+    const borrows = await Borrow.find()
+      .populate({
+        path: "equipment",
+        select: "name code location"
+      })
+      .populate({
+        path: "user",
+        select: "name"
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
-  return NextResponse.json(result);
+
+    const result = borrows.map(item => ({
+
+      _id: item._id,
+
+      borrowerName:
+        item.user?.name ?? "-",
+
+      equipmentName:
+        item.equipment?.name ?? "-",
+
+      equipmentCode:
+        item.equipment?.code ?? "-",
+
+      location:
+        item.location ??
+        item.equipment?.location ??
+        "-",
+
+      status:
+        item.status ?? "pending",
+
+      borrowDate:
+        item.createdAt
+
+    }));
+
+
+    return NextResponse.json(result);
+
+  } catch (error) {
+
+    console.error("BORROW LIST ERROR:", error);
+
+    return NextResponse.json(
+      { message: "โหลดข้อมูลล้มเหลว" },
+      { status: 500 }
+    );
+
+  }
+
 }
