@@ -213,8 +213,8 @@ export default function AdminBorrowPage() {
         >
           <div className="flex justify-between items-start">
             <div>
-              <p><b>อุปกรณ์:</b> {item.equipment?.name}</p>
-              <p><b>ผู้ยืม:</b> {item.user?.name}</p>
+              <p><b>อุปกรณ์:</b> {item.equipmentName}</p>
+              <p><b>ผู้ยืม:</b> {item.borrowerName}</p>
               <p><b>ใช้ที่:</b> {item.location}</p>
               <StatusBadge status={item.status} />
             </div>
