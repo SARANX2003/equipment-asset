@@ -4,13 +4,26 @@ import Equipment from "@/models/Equipment";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+
+  await dbConnect();
+
+  const borrows = await Borrow.find()
+    .populate("equipment")   // ดึงข้อมูลอุปกรณ์
+    .populate("user")        // ดึงข้อมูลผู้ยืม
+    .sort({ createdAt: -1 });
+
+  return NextResponse.json(borrows);
+
+}
+
 export async function POST(request) {
   try {
+
     await dbConnect();
 
     const { equipmentId, userId, location } = await request.json();
 
-    // 🔎 ตรวจสอบ ObjectId
     if (
       !mongoose.Types.ObjectId.isValid(equipmentId) ||
       !mongoose.Types.ObjectId.isValid(userId)
@@ -21,7 +34,6 @@ export async function POST(request) {
       );
     }
 
-    // 🔎 ตรวจสอบอุปกรณ์
     const equipment = await Equipment.findById(equipmentId);
 
     if (!equipment) {
@@ -38,7 +50,6 @@ export async function POST(request) {
       );
     }
 
-    // ✅ สร้างคำขอยืม
     const newBorrow = await Borrow.create({
       equipment: equipmentId,
       user: userId,
@@ -52,10 +63,13 @@ export async function POST(request) {
     });
 
   } catch (error) {
+
     console.error("BORROW ERROR:", error);
+
     return NextResponse.json(
       { message: "เกิดข้อผิดพลาดในระบบ" },
       { status: 500 }
     );
+
   }
 }
