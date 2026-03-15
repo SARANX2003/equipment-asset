@@ -91,6 +91,14 @@ export default function DashboardLayout({ children }) {
           <p className="text-xs uppercase text-green-300 px-2 mt-6">ผู้ดูแลระบบ</p>
           {menuItem("/admin/borrow", "จัดการคำขอยืม", "📥")}
           {menuItem("/admin/dashboard", "Dashboard", "📊")}
+          {menuItem("/history", "ประวัติการใช้งาน", "📜")}
+
+          <a
+          href="/api/export-equipment"
+          className="flex items-center px-4 py-2 rounded-lg hover:bg-green-600/70 transition"
+          >
+          ⬇ ดาวน์โหลดข้อมูลครุภัณฑ์
+          </a>
 
           <div className="mt-6 space-y-2">
 

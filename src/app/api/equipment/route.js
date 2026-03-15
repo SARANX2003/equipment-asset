@@ -22,8 +22,11 @@ export async function GET(req) {
 
     // 🔎 ค้นหาชื่อ
     if (search) {
-      query.name = { $regex: search, $options: "i" };
-    }
+  query.$or = [
+    { name: { $regex: search, $options: "i" } },
+    { code: { $regex: search, $options: "i" } },
+  ];
+}
 
     // 📌 กรองสถานะ
     if (status !== "all") {

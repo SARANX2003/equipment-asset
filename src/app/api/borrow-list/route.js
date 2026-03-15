@@ -1,24 +1,27 @@
 import dbConnect from "@/lib/mongodb";
 import Borrow from "@/models/Borrow";
-import "@/models/User";        // 🔥 บังคับโหลด model
-import "@/models/Equipment";   // 🔥 บังคับโหลด model
+import "@/models/User";
+import "@/models/Equipment";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  try {
-    await dbConnect();
 
-    const borrows = await Borrow.find()
-      .populate("equipment")
-      .populate("user")
-      .sort({ createdAt: -1 });
+  await dbConnect();
 
-    return NextResponse.json(borrows);
-  } catch (error) {
-    console.error("BORROW LIST ERROR:", error);
-    return NextResponse.json(
-      { message: error.message },
-      { status: 500 }
-    );
-  }
+  const borrows = await Borrow.find()
+    .populate("equipment")
+    .populate("user")
+    .sort({ createdAt: -1 });
+
+  const result = borrows.map(item => ({
+    _id: item._id,
+    borrowerName: item.user?.name || "-",
+    equipmentName: item.equipment?.name || "-",
+    equipmentCode: item.equipment?.code || "-",
+    location: item.location || item.equipment?.location || "-",
+    status: item.status,
+    borrowDate: item.createdAt
+  }));
+
+  return NextResponse.json(result);
 }
